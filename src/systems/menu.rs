@@ -6,14 +6,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 //  INCLUDES  //
 
-use bevy::prelude::*;
-
-mod settings;
 use crate::settings::*;
+use crate::utility::*;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-mod menu {
+pub mod menu {
   use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
 
   use super::{despawn_screen, DisplayQuality, GameState, Volume, TEXT_COLOR};
