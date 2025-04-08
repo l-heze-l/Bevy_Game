@@ -1,3 +1,2 @@
-pub mod stepping;
-pub mod setup;
+pub mod camera;
 pub mod despawn_screen;

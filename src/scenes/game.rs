@@ -4,29 +4,18 @@
 /// game.rs                                                                 ///
 /// 3/27/2025                                                               ///
 ///////////////////////////////////////////////////////////////////////////////
+//  IMPORTS  //
 
-use crate::resources::game_state::GameState;
+use crate::scenes::GameState;
 use crate::resources::display_quality::DisplayQuality;
 use crate::resources::volume::Volume;
-use crate::resources::config::*;
+use crate::resources::colors::*;
 use crate::systems::despawn_screen::despawn_screen;
+use bevy::prelude::*;
 
-use bevy::{
-  color::palettes::basic::{BLUE, LIME},
-  prelude::*,
-};
 
 ///////////////////////////////////////////////////////////////////////////////
-
-
-// This plugin will contain the game. In this case, it's just be a screen that will
-// display the current settings for 5 seconds before returning to the menu
-pub fn game_plugin(app: &mut App) {
-  app
-    .add_systems(OnEnter(GameState::Game), game_setup)
-    .add_systems(Update, game.run_if(in_state(GameState::Game)))
-    .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
-}
+//  DECLARATIONS  //
 
 // Tag component used to tag entities added on the game screen
 #[derive(Component)]
@@ -34,6 +23,20 @@ struct OnGameScreen;
 
 #[derive(Resource, Deref, DerefMut)]
 struct GameTimer(Timer);
+
+
+///////////////////////////////////////////////////////////////////////////////
+//  MAIN PLUGIN  //
+
+pub fn game_plugin(app: &mut App) {
+  app
+    .add_systems(OnEnter(GameState::Game), game_setup)
+    .add_systems(Update, game.run_if(in_state(GameState::Game)))
+    .add_systems(OnExit(GameState::Game), despawn_screen::<OnGameScreen>);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  SUPPORTING FUNCTIONS  //
 
 fn game_setup(
   mut commands: Commands,
@@ -74,7 +77,7 @@ fn game_setup(
               font_size: 67.0,
               ..default()
             },
-            TextColor(TEXT_COLOR),
+            TextColor(TEXT_1.into()) ,
             Node {
               margin: UiRect::all(Val::Px(50.0)),
               ..default()
@@ -94,7 +97,7 @@ fn game_setup(
                 font_size: 50.0,
                 ..default()
               },
-              TextColor(BLUE.into()),
+              TextColor(TEXT_2.into()),
             ));
             p.spawn((
               TextSpan::new(" - "),
@@ -102,7 +105,7 @@ fn game_setup(
                 font_size: 50.0,
                 ..default()
               },
-              TextColor(TEXT_COLOR),
+              TextColor(TEXT_1.into()) ,
             ));
             p.spawn((
               TextSpan(format!("volume: {:?}", *volume)),
@@ -110,7 +113,7 @@ fn game_setup(
                 font_size: 50.0,
                 ..default()
               },
-              TextColor(LIME.into()),
+              TextColor(TEXT_3.into()),
             ));
           });
         });
@@ -118,6 +121,7 @@ fn game_setup(
   // Spawn a 5 seconds timer to trigger going back to the menu
   commands.insert_resource(GameTimer(Timer::from_seconds(5.0, TimerMode::Once)));
 }
+
 
 // Tick the timer, and change state when finished
 fn game(
@@ -129,4 +133,6 @@ fn game(
     game_state.set(GameState::Menu);
   }
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////

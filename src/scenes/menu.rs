@@ -6,67 +6,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 //  INCLUDES  //
 
-use crate::resources::game_state::GameState;
+use crate::scenes::GameState;
 use crate::resources::display_quality::DisplayQuality;
 use crate::resources::volume::Volume;
-use crate::resources::config::*;
+use crate::resources::colors::*;
 use crate::systems::despawn_screen::despawn_screen;
 
-use bevy::{app::AppExit, color::palettes::css::CRIMSON, prelude::*};
+use bevy::{
+  app::AppExit, 
+  prelude::*
+};
 
 
 ///////////////////////////////////////////////////////////////////////////////
-
-
-// This plugin manages the menu, with 5 different screens:
-// - a main menu with "New Game", "Settings", "Quit"
-// - a settings menu with two submenus and a back button
-// - two settings screen with a setting that can be set and a back button
-pub fn menu_plugin(app: &mut App) {
-  app
-    // At start, the menu is not enabled. This will be changed in `menu_setup` when
-    // entering the `GameState::Menu` state.
-    // Current screen in the menu is handled by an independent state from `GameState`
-    .init_state::<MenuState>()
-    .add_systems(OnEnter(GameState::Menu), menu_setup)
-    // Systems to handle the main menu screen
-    .add_systems(OnEnter(MenuState::Main), main_menu_setup)
-    .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
-    // Systems to handle the settings menu screen
-    .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
-    .add_systems(
-      OnExit(MenuState::Settings),
-      despawn_screen::<OnSettingsMenuScreen>,
-    )
-    // Systems to handle the display settings screen
-    .add_systems(
-      OnEnter(MenuState::SettingsDisplay),
-      display_settings_menu_setup,
-    )
-    .add_systems(
-      Update,
-      (setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)),),
-    )
-    .add_systems(
-      OnExit(MenuState::SettingsDisplay),
-      despawn_screen::<OnDisplaySettingsMenuScreen>,
-    )
-    // Systems to handle the sound settings screen
-    .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
-    .add_systems(
-      Update,
-      setting_button::<Volume>.run_if(in_state(MenuState::SettingsSound)),
-    )
-    .add_systems(
-      OnExit(MenuState::SettingsSound),
-      despawn_screen::<OnSoundSettingsMenuScreen>,
-    )
-    // Common systems to all screens that handles buttons behavior
-    .add_systems(
-      Update,
-      (menu_action, button_system).run_if(in_state(GameState::Menu)),
-    );
-}
+//  DECLARATIONS  //
 
 // State used for the current menu screen
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
@@ -116,6 +69,59 @@ enum MenuButtonAction {
   Quit,
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+//  MAIN PLUGIN  //
+
+pub fn menu_plugin(app: &mut App) {
+  app
+    // At start, the menu is not enabled. This will be changed in `menu_setup` when
+    // entering the `GameState::Menu` state.
+    // Current screen in the menu is handled by an independent state from `GameState`
+    .init_state::<MenuState>()
+    .add_systems(OnEnter(GameState::Menu), menu_setup)
+    // Systems to handle the main menu screen
+    .add_systems(OnEnter(MenuState::Main), main_menu_setup)
+    .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
+    // Systems to handle the settings menu screen
+    .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
+    .add_systems(
+      OnExit(MenuState::Settings),
+      despawn_screen::<OnSettingsMenuScreen>,
+    )
+    // Systems to handle the display settings screen
+    .add_systems(
+      OnEnter(MenuState::SettingsDisplay),
+      display_settings_menu_setup,
+    )
+    .add_systems(
+      Update,
+      (setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)),),
+    )
+    .add_systems(
+      OnExit(MenuState::SettingsDisplay),
+      despawn_screen::<OnDisplaySettingsMenuScreen>,
+    )
+    // Systems to handle the sound settings screen
+    .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
+    .add_systems(
+      Update,
+      setting_button::<Volume>.run_if(in_state(MenuState::SettingsSound)),
+    )
+    .add_systems(
+      OnExit(MenuState::SettingsSound),
+      despawn_screen::<OnSoundSettingsMenuScreen>,
+    )
+    // Common systems to all screens that handles buttons behavior
+    .add_systems(
+      Update,
+      (menu_action, button_system).run_if(in_state(GameState::Menu)),
+    );
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//  SUPPORTING FUNCTIONS  //
+
 // This system handles changing all buttons color based on mouse interaction
 fn button_system(
   mut interaction_query: Query<
@@ -132,6 +138,7 @@ fn button_system(
     }
   }
 }
+
 
 // This system updates the settings when a new value for a setting is selected, and marks
 // the button as the one currently selected
@@ -198,17 +205,17 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             align_items: AlignItems::Center,
             ..default()
           },
-          BackgroundColor(CRIMSON.into()),
+          BackgroundColor(MENU.into()),
         ))
         .with_children(|parent| {
           // Display the game name
           parent.spawn((
-            Text::new("Bevy Game Menu UI"),
+            Text::new("Spookemon"),
             TextFont {
               font_size: 67.0,
               ..default()
             },
-            TextColor(TEXT_COLOR),
+            TextColor(TEXT_1.into()) ,
             Node {
               margin: UiRect::all(Val::Px(50.0)),
               ..default()
@@ -232,7 +239,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
               parent.spawn((
                 Text::new("New Game"),
                 button_text_font.clone(),
-                TextColor(TEXT_COLOR),
+                TextColor( TEXT_1.into()) ,
               ));
             });
           parent
@@ -248,7 +255,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
               parent.spawn((
                 Text::new("Settings"),
                 button_text_font.clone(),
-                TextColor(TEXT_COLOR),
+                TextColor( TEXT_1.into()) ,
               ));
             });
           parent
@@ -264,7 +271,7 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
               parent.spawn((
                 Text::new("Quit"),
                 button_text_font,
-                TextColor(TEXT_COLOR),
+                TextColor( TEXT_1.into()) ,
               ));
             });
         });
@@ -286,7 +293,7 @@ fn settings_menu_setup(mut commands: Commands) {
       font_size: 33.0,
       ..default()
     },
-    TextColor(TEXT_COLOR),
+    TextColor( TEXT_1.into()) ,
   );
 
   commands
@@ -308,7 +315,7 @@ fn settings_menu_setup(mut commands: Commands) {
             align_items: AlignItems::Center,
             ..default()
           },
-          BackgroundColor(CRIMSON.into()),
+          BackgroundColor(MENU.into()),
         ))
         .with_children(|parent| {
           for (action, text) in [
@@ -345,7 +352,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
       font_size: 33.0,
       ..default()
     },
-    TextColor(TEXT_COLOR),
+    TextColor( TEXT_1.into()) ,
   );
 
   commands
@@ -367,7 +374,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
             align_items: AlignItems::Center,
             ..default()
           },
-          BackgroundColor(CRIMSON.into()),
+          BackgroundColor(MENU.into()),
         ))
         .with_children(|parent| {
           // Create a new `Node`, this time not setting its `flex_direction`. It will
@@ -378,7 +385,7 @@ fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<Disp
                 align_items: AlignItems::Center,
                 ..default()
               },
-              BackgroundColor(CRIMSON.into()),
+              BackgroundColor(MENU.into()),
             ))
             .with_children(|parent| {
               // Display a label for the current setting
@@ -442,7 +449,7 @@ fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
       font_size: 33.0,
       ..default()
     },
-    TextColor(TEXT_COLOR),
+    TextColor(TEXT_1.into()),
   );
 
   commands
@@ -464,7 +471,7 @@ fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
             align_items: AlignItems::Center,
             ..default()
           },
-          BackgroundColor(CRIMSON.into()),
+          BackgroundColor(MENU.into()),
         ))
         .with_children(|parent| {
           parent
@@ -473,7 +480,7 @@ fn sound_settings_menu_setup(mut commands: Commands, volume: Res<Volume>) {
                 align_items: AlignItems::Center,
                 ..default()
               },
-              BackgroundColor(CRIMSON.into()),
+              BackgroundColor(MENU.into()),
             ))
             .with_children(|parent| {
               parent.spawn((Text::new("Volume"), button_text_style.clone()));
@@ -539,4 +546,6 @@ fn menu_action(
     }
   }
 }
+
+
 ///////////////////////////////////////////////////////////////////////////////
